@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ケニア鳥類 リスニング・フラッシュカード</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans pb-12">
+
+    <!-- Header -->
+    <header class="bg-emerald-700 text-white shadow-md">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-crow"></i> ケニア鳥類 フラッシュカード
+            </h1>
+            <div class="text-xs bg-emerald-800 px-3 py-1.5 rounded-full border border-emerald-600">
+                チェックリスト完全準拠 (全292種)
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-4xl mx-auto px-4 mt-6">
+
+        <!-- Settings -->
+        <div class="bg-white rounded-xl p-4 shadow-sm mb-6 border border-slate-200">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">英名後の待機時間</label>
+                    <select id="intervalSelect" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="5">5 秒</option>
+                        <option value="10" selected>10 秒 (指定値)</option>
+                        <option value="15">15 秒</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-500 mb-1">読み上げ速度</label>
+                    <select id="rateSelect" class="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                        <option value="0.8">ゆっくり (0.8x)</option>
+                        <option value="1.0" selected>標準 (1.0x)</option>
+                        <option value="1.2">速め (1.2x)</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card Section -->
+        <div class="mb-6">
+            <div id="cardContainer" class="w-full min-h-[300px] cursor-pointer">
+                <div class="relative w-full h-full min-h-[300px] bg-white rounded-2xl shadow-lg border border-slate-200 p-6 flex flex-col justify-between items-center text-center">
+                    
+                    <div class="w-full flex justify-between items-center text-xs text-slate-400 border-b pb-3 border-slate-100">
+                        <span id="cardCounter">1 / 292</span>
+                        <span id="statusBadge" class="bg-slate-100 text-slate-600 px-2 py-1 rounded font-medium">停止中</span>
+                    </div>
+
+                    <div class="my-auto py-6 w-full">
+                        <!-- B列: 英名 -->
+                        <div class="mb-6">
+                            <span class="text-xs uppercase tracking-wider font-bold text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">英名 (B列)</span>
+                            <h2 id="englishText" class="text-2xl sm:text-4xl font-extrabold text-slate-800 mt-2 min-h-[2.5rem] flex items-center justify-center">
+                                ---
+                            </h2>
+                            <button id="playEnBtn" class="mt-2 text-emerald-600 hover:text-emerald-700 text-sm font-medium inline-flex items-center gap-1">
+                                <i class="fa-solid fa-volume-high"></i> 英名を再再生
+                            </button>
+                        </div>
+
+                        <!-- カウントダウン表示 -->
+                        <div id="countdownText" class="text-lg font-bold text-emerald-600 mb-4 h-6"></div>
+
+                        <!-- A列: 和名 -->
+                        <div id="japaneseSection" class="opacity-30 transition-opacity duration-300">
+                            <span class="text-xs uppercase tracking-wider font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">和名 (A列)</span>
+                            <h3 id="japaneseText" class="text-2xl sm:text-3xl font-bold text-slate-700 mt-2 min-h-[2rem] flex items-center justify-center">
+                                ???
+                            </h3>
+                            <button id="playJaBtn" class="mt-2 text-slate-500 hover:text-slate-700 text-sm font-medium inline-flex items-center gap-1">
+                                <i class="fa-solid fa-volume-high"></i> 和名を再再生
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="text-xs text-slate-400 pt-2 border-t w-full border-slate-100">
+                        カードをクリックすると和名を表示できます
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="flex flex-wrap gap-3 justify-center mb-8">
+            <button id="prevBtn" class="bg-white hover:bg-slate-50 text-slate-700 font-semibold px-4 py-3 rounded-xl border border-slate-300 shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-chevron-left"></i> 前へ
+            </button>
+            
+            <button id="startAutoBtn" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 text-lg">
+                <i id="startIcon" class="fa-solid fa-play"></i> <span id="startBtnText">自動再生 開始</span>
+            </button>
+
+            <button id="nextBtn" class="bg-white hover:bg-slate-50 text-slate-700 font-semibold px-4 py-3 rounded-xl border border-slate-300 shadow-sm flex items-center gap-2">
+                次へ <i class="fa-solid fa-chevron-right"></i>
+            </button>
+
+            <button id="shuffleBtn" class="bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold px-4 py-3 rounded-xl flex items-center gap-2">
+                <i class="fa-solid fa-shuffle"></i> シャッフル
+            </button>
+        </div>
+
+        <!-- Bird List View -->
+        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-200">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                <h3 class="font-bold text-slate-700 flex items-center gap-2">
+                    <i class="fa-solid fa-list-ul text-emerald-600"></i> 一覧リスト
+                </h3>
+                <input type="text" id="searchInput" placeholder="検索..." class="w-full sm:w-64 bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+            </div>
+
+            <div class="max-h-80 overflow-y-auto border rounded-lg border-slate-100">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 text-slate-500 sticky top-0 border-b border-slate-200">
+                        <tr>
+                            <th class="p-2.5 w-12 text-center">#</th>
+                            <th class="p-2.5 font-semibold">英名 (B列)</th>
+                            <th class="p-2.5 font-semibold">和名 (A列)</th>
+                            <th class="p-2.5 w-16 text-center">再生</th>
+                        </tr>
+                    </thead>
+                    <tbody id="birdTableBody" class="divide-y divide-slate-100 text-slate-700">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- EXACT DATA FROM CHECKLIST SHEET -->
+    <script>
+        const checklistData = [
+            {ja: "ダチョウ", en: "Common Ostrich"},
+            {ja: "シロガオリュウキュウガモ", en: "White-faced Whistling-Duck"},
+            {ja: "コシジロガモ", en: "White-backed Duck"},
+            {ja: "エジプトガン", en: "Egyptian Goose"},
+            {ja: "シマアジ", en: "Garganey"},
+            {ja: "アフリカコガモ", en: "Blue-billed Teal"},
+            {ja: "ハシビロガモ", en: "Northern Shoveler"},
+            {ja: "シラボシガモ", en: "African Black Duck"},
+            {ja: "キバシガモ", en: "Yellow-billed Duck"},
+            {ja: "アカハシコガモ", en: "Cape Teal"},
+            {ja: "アカハシオナガガモ", en: "Red-billed Duck"},
+            {ja: "オナガガモ", en: "Northern Pintail"},
+            {ja: "ネッタイハジロ", en: "Southern Pochard"},
+            {ja: "アフリカオタテガモ", en: "Maccoa Duck"},
+            {ja: "ホロホロチョウ", en: "Helmeted Guineafowl"},
+            {ja: "コクイシャコ", en: "Coqui Francolin"},
+            {ja: "ヨーロッパウズラ", en: "Common Quail"},
+            {ja: "シロスジシャコ", en: "Jackson's Spurfowl"},
+            {ja: "メスアカシャコ", en: "Hildebrandt's Spurfowl"},
+            {ja: "ウロコシャコ", en: "Scaly Spurfowl"},
+            {ja: "ウロコカワラバト", en: "Speckled Pigeon"},
+            {ja: "アカメジュズカケバト", en: "Red-eyed Dove"},
+            {ja: "アフリカジュズカケバト", en: "Ring-necked Dove"},
+            {ja: "タンバリンバト", en: "Tambourine Dove"},
+            {ja: "カンムリエボシドリ", en: "Great Blue Turaco"},
+            {ja: "ムラサキエボシドリ", en: "Ross's Turaco"},
+            {ja: "ハシグロエボシドリ", en: "Black-billed Turaco"},
+            {ja: "オウカンエボシドリ", en: "Hartlaub's Turaco"},
+            {ja: "ブロンズミドリカッコウ", en: "Dideric Cuckoo"},
+            {ja: "シロハラミドリカッコウ", en: "Klaas's Cuckoo"},
+            {ja: "ミドリカッコウ", en: "African Emerald Cuckoo"},
+            {ja: "チャムネカッコウ", en: "Red-chested Cuckoo"},
+            {ja: "カッコウ", en: "Common Cuckoo"},
+            {ja: "アビシニアヨタカ", en: "Montane Nightjar"},
+            {ja: "ニシヒメアマツバメ", en: "Little Swift"},
+            {ja: "シラボシクイナ", en: "White-spotted Flufftail"},
+            {ja: "バン", en: "Eurasian Moorhen"},
+            {ja: "アフリカオオバン", en: "Red-knobbed Coot"},
+            {ja: "アフリカセイケイ", en: "African Swamphen"},
+            {ja: "アフリカクロクイナ", en: "Black Crake"},
+            {ja: "ホオジロカンムリヅル", en: "Gray Crowned-Crane"},
+            {ja: "セイタカシギ", en: "Black-winged Stilt"},
+            {ja: "ソリハシセイタカシギ", en: "Pied Avocet"},
+            {ja: "ハジロコチドリ", en: "Common Ringed Plover"},
+            {ja: "ミスジチドリ", en: "Three-banded Plover"},
+            {ja: "レンカクゲリ", en: "Long-toed Lapwing"},
+            {ja: "シロクロゲリ", en: "Blacksmith Lapwing"},
+            {ja: "ツバメゲリ", en: "Spur-winged Lapwing"},
+            {ja: "ハグロゲリ", en: "Black-winged Lapwing"},
+            {ja: "オウカンゲリ", en: "Crowned Lapwing"},
+            {ja: "ヒメチドリ", en: "Kittlitz's Plover"},
+            {ja: "ヒメレンカク", en: "Lesser Jacana"},
+            {ja: "アフリカレンカク", en: "African Jacana"},
+            {ja: "オグロシギ", en: "Black-tailed Godwit"},
+            {ja: "ヨーロッパジシギ", en: "Great Snipe"},
+            {ja: "アフリカジシギ", en: "African Snipe"},
+            {ja: "タシギ", en: "Common Snipe"},
+            {ja: "イソシギ", en: "Common Sandpiper"},
+            {ja: "クサシギ", en: "Green Sandpiper"},
+            {ja: "コアオアシシギ", en: "Marsh Sandpiper"},
+            {ja: "タカブシギ", en: "Wood Sandpiper"},
+            {ja: "ツルシギ", en: "Spotted Redshank"},
+            {ja: "アオアシシギ", en: "Common Greenshank"},
+            {ja: "エリマキシギ", en: "Ruff"},
+            {ja: "サルハマシギ", en: "Curlew Sandpiper"},
+            {ja: "ヨーロッパトウネン", en: "Little Stint"},
+            {ja: "ズアオカモメ", en: "Gray-hooded Gull"},
+            {ja: "アフリカハサミアジサシ", en: "African Skimmer"},
+            {ja: "ハシブトアジサシ", en: "Gull-billed Tern"},
+            {ja: "クロハラアジサシ", en: "Whiskered Tern"},
+            {ja: "ハジロクロハラアジサシ", en: "White-winged Tern"},
+            {ja: "ヨーロッパフラミンゴ", en: "Greater Flamingo"},
+            {ja: "コフラミンゴ", en: "Lesser Flamingo"},
+            {ja: "カイツブリ", en: "Little Grebe"},
+            {ja: "クロスキハシコウ", en: "African Openbill"},
+            {ja: "ナベコウ", en: "Black Stork"},
+            {ja: "シュバシコウ", en: "White Stork"},
+            {ja: "クラハシコウ", en: "Saddle-billed Stork"},
+            {ja: "アフリカハゲコウ", en: "Marabou Stork"},
+            {ja: "アフリカトキコウ", en: "Yellow-billed Stork"},
+            {ja: "アフリカヘビウ", en: "African Darter"},
+            {ja: "アフリカコビトウ", en: "Reed Cormorant"},
+            {ja: "カワウ", en: "Great Cormorant"},
+            {ja: "ブロンズトキ", en: "Glossy Ibis"},
+            {ja: "アフリカクロトキ", en: "African Sacred Ibis"},
+            {ja: "オリーブトキ", en: "Olive Ibis"},
+            {ja: "ハダダトキ", en: "Hadada Ibis"},
+            {ja: "アフリカヘラサギ", en: "African Spoonbill"},
+            {ja: "ゴイサギ", en: "Black-crowned Night Heron"},
+            {ja: "クロコサギ", en: "Black Heron"},
+            {ja: "コサギ", en: "Little Egret"},
+            {ja: "カンムリサギ", en: "Squacco Heron"},
+            {ja: "ニシアマサギ", en: "Western Cattle-Egret"},
+            {ja: "ダイサギ", en: "Great Egret"},
+            {ja: "アフリカチュウサギ", en: "Yellow-billed Egret"},
+            {ja: "アオサギ", en: "Gray Heron"},
+            {ja: "ムラサキサギ", en: "Purple Heron"},
+            {ja: "ズグロアオサギ", en: "Black-headed Heron"},
+            {ja: "オニアオサギ", en: "Goliath Heron"},
+            {ja: "シュモクドリ", en: "Hamerkop"},
+            {ja: "モモイロペリカン", en: "Great White Pelican"},
+            {ja: "コシベニペリカン", en: "Pink-backed Pelican"},
+            {ja: "ヘビクイワシ", en: "Secretarybird"},
+            {ja: "ミサゴ", en: "Osprey"},
+            {ja: "カタグロトビ", en: "Black-winged Kite"},
+            {ja: "ヨーロッパハチクマ", en: "European Honey-buzzard"},
+            {ja: "ミミヒダハゲワシ", en: "Lappet-faced Vulture"},
+            {ja: "コシジロハゲワシ", en: "White-backed Vulture"},
+            {ja: "マダラハゲワシ", en: "Rüppell's Griffon"},
+            {ja: "ダルマワシ", en: "Bateleur"},
+            {ja: "オビチュウヒワシ", en: "Western Banded Snake-Eagle"},
+            {ja: "ムナグロチュウヒワシ", en: "Black-chested Snake-Eagle"},
+            {ja: "チャイロチュウヒワシ", en: "Brown Snake-Eagle"},
+            {ja: "カンムリクマタカ", en: "Crowned Eagle"},
+            {ja: "ゴマバラワシ", en: "Martial Eagle"},
+            {ja: "エボシクマタカ", en: "Long-crested Eagle"},
+            {ja: "アシナガワシ", en: "Lesser Spotted Eagle"},
+            {ja: "カラフトワシ", en: "Greater Spotted Eagle"},
+            {ja: "ソウゲンワシ", en: "Steppe Eagle"},
+            {ja: "アフリカソウゲンワシ", en: "Tawny Eagle"},
+            {ja: "モモジロクマタカ", en: "African Hawk-Eagle"},
+            {ja: "ヨーロッパチュウヒ", en: "Western Marsh Harrier"},
+            {ja: "アフリカチュウヒ", en: "African Marsh Harrier"},
+            {ja: "ウスハイイロチュウヒ", en: "Pallid Harrier"},
+            {ja: "ヒメハイイロチュウヒ", en: "Montagu's Harrier"},
+            {ja: "トビ", en: "Black Kite"},
+            {ja: "ヨゲンノスリ", en: "Augur Buzzard"},
+            {ja: "ノスリ", en: "Common Buzzard"},
+            {ja: "クロワシミミズク", en: "Verreaux's Eagle-Owl"},
+            {ja: "ムネアカスズメフクロウ", en: "Red-chested Owlet"},
+            {ja: "チャイロネズミドリ", en: "Speckled Mousebird"},
+            {ja: "アオエリネズミドリ", en: "Blue-naped Mousebird"},
+            {ja: "アフリカキヌバネドリ", en: "Narina Trogon"},
+            {ja: "シマオアフリカキヌバネドリ", en: "Bar-tailed Trogon"},
+            {ja: "ヤツガシラ", en: "Common Hoopoe"},
+            {ja: "ミドリモリヤツガシラ", en: "Green Woodhoopoe"},
+            {ja: "カオジロモリヤツガシラ", en: "White-headed Woodhoopoe"},
+            {ja: "カンムリコサイチョウ", en: "Crowned Hornbill"},
+            {ja: "ギンガオサイチョウ", en: "Silvery-cheeked Hornbill"},
+            {ja: "ハシダカサイチョウ", en: "Black-and-white-casqued Hornbill"},
+            {ja: "ムラサキハチクイ", en: "Blue-headed Bee-eater"},
+            {ja: "シロビタイハチクイ", en: "White-fronted Bee-eater"},
+            {ja: "チャムネハチクイ", en: "Cinnamon-chested Bee-eater"},
+            {ja: "ノドジロハチクイ", en: "White-throated Bee-eater"},
+            {ja: "カンムリカワセミ", en: "Malachite Kingfisher"},
+            {ja: "ヒメショウビン", en: "African Pygmy Kingfisher"},
+            {ja: "タテフコショウビン", en: "Striped Kingfisher"},
+            {ja: "オオヤマセミ", en: "Giant Kingfisher"},
+            {ja: "ヒメヤマセミ", en: "Pied Kingfisher"},
+            {ja: "ニシブッポウソウ", en: "European Roller"},
+            {ja: "ライラックニシブッポウソウ", en: "Lilac-breasted Roller"},
+            {ja: "キバシオナガゴシキドリ", en: "Eastern Yellow-billed Barbet"},
+            {ja: "ハイノドゴシキドリ", en: "Gray-throated Barbet"},
+            {ja: "キゴシヒメゴシキドリ", en: "Yellow-rumped Tinkerbird"},
+            {ja: "キミミヒメゴシキドリ", en: "Yellow-spotted Barbet"},
+            {ja: "キガシラゲラ", en: "Golden-crowned Woodpecker"},
+            {ja: "アフリカコゲラ", en: "Cardinal Woodpecker"},
+            {ja: "リキュウガシラゲラ", en: "Mountain Gray Woodpecker"},
+            {ja: "チャミミアオゲラ", en: "Brown-eared Woodpecker"},
+            {ja: "ゴマダラアオゲラ", en: "Buff-spotted Woodpecker"},
+            {ja: "アフリカアオゲラ", en: "Nubian Woodpecker"},
+            {ja: "ヒメチョウゲンボウ", en: "Lesser Kestrel"},
+            {ja: "チョウゲンボウ", en: "Eurasian Kestrel"},
+            {ja: "チゴハヤブサ", en: "Eurasian Hobby"},
+            {ja: "アフリカヒロハシ", en: "African Broadbill"},
+            {ja: "コンゴクロサンショウクイ", en: "Petit's Cuckooshrike"},
+            {ja: "テリサンショウクイ", en: "Purple-throated Cuckooshrike"},
+            {ja: "キエリコウライウグイス", en: "Western Black-headed Oriole"},
+            {ja: "アフリカズキンコウライウグイス", en: "African Black-headed Oriole"},
+            {ja: "メスアカメガネヒタキ", en: "Chestnut Wattle-eye"},
+            {ja: "メガネヒタキ", en: "Brown-throated Wattle-eye"},
+            {ja: "ヒガシホオアカメガネヒタキ", en: "Jameson's Wattle-eye"},
+            {ja: "キバラメガネヒタキ", en: "Yellow-bellied Wattle-eye"},
+            {ja: "アゴフセワタビタキ", en: "Chinspot Batis"},
+            {ja: "アカアシフクレヤブモズ", en: "Pink-footed Puffback"},
+            {ja: "シロスジヤブモズ", en: "Lühder's Bushshrike"},
+            {ja: "スズゴエヤブモズ", en: "Tropical Boubou"},
+            {ja: "マユジロシロハラモズ", en: "Gray-green Bushshrike"},
+            {ja: "", en: "Sharpe's Drongo"},
+            {ja: "クロオウチュウ", en: "Fork-tailed Drongo"},
+            {ja: "アフリカサンコウチョウ", en: "African Paradise-Flycatcher"},
+            {ja: "セアカモズ", en: "Red-backed Shrike"},
+            {ja: "ハグロオナガモズ", en: "Gray-backed Fiscal"},
+            {ja: "ハグロカタシロモズ", en: "Mackinnon's Shrike"},
+            {ja: "キタカタジロオナガモズ", en: "Northern Fiscal"},
+            {ja: "ツルハシガラス", en: "Cape Crow"},
+            {ja: "ムナジロガラス", en: "Pied Crow"},
+            {ja: "ソライロヒタキ", en: "African Blue Flycatcher"},
+            {ja: "", en: "Sentinel Lark"},
+            {ja: "クリビタイヒメムシクイ", en: "Turner's Eremomela"},
+            {ja: "ワキアカイロムシクイ", en: "Black-collared Apalis"},
+            {ja: "ミドリコムシクイ", en: "Green-backed Camaroptera"},
+            {ja: "オリーブコムシクイ", en: "Olive-green Camaroptera"},
+            {ja: "ノドグロイロムシクイ", en: "Black-throated Apalis"},
+            {ja: "キムネイロムシクイ", en: "Yellow-breasted Apalis"},
+            {ja: "セグロイロムシクイ", en: "Buff-throated Apalis"},
+            {ja: "セグロイロムシクイ", en: "Buff-throated Apalis"},
+            {ja: "マミハウチワドリ", en: "Tawny-flanked Prinia"},
+            {ja: "ノドジロハウチワドリ", en: "White-chinned Prinia"},
+            {ja: "クロガオセッカ", en: "Chubb's Cisticola"},
+            {ja: "タカネセッカ", en: "Hunter's Cisticola"},
+            {ja: "アフリカセッカ", en: "Rattling Cisticola"},
+            {ja: "アカボウシセッカ", en: "Levaillant's Cisticola"},
+            {ja: "ケニアセッカ", en: "Aberdare Cisticola"},
+            {ja: "タンビセッカ", en: "Wing-snapping Cisticola"},
+            {ja: "ニッケイオウギセッカ", en: "Cinnamon Bracken-Warbler"},
+            {ja: "シロガシラクロツバメ", en: "White-headed Sawwing"},
+            {ja: "ムネジロクロツバメ", en: "Black Sawwing"},
+            {ja: "ノドアカアフリカチャイロツバメ", en: "Red-throated Crag-Martin"},
+            {ja: "ツバメ", en: "Barn Swallow"},
+            {ja: "アフリカコシアカツバメ", en: "African Red-rumped Swallow"},
+            {ja: "ハシボソアオヒヨ", en: "Slender-billed Greenbul"},
+            {ja: "タノシタアオヒヨドリ", en: "Joyful Greenbul"},
+            {ja: "ミドリヒヨドリ", en: "Shelley's Greenbul"},
+            {ja: "キスジアオヒヨ", en: "Yellow-whiskered Greenbul"},
+            {ja: "チャイロアオヒヨ", en: "Ansorge's Greenbul"},
+            {ja: "ニシキスジチャイロヒヨドリ", en: "Cabanis's Greenbul"},
+            {ja: "アフリカヒヨドリ", en: "Common Bulbul"},
+            {ja: "コバシミドリムシクイ", en: "Green Hylia"},
+            {ja: "キクユメジロ", en: "Kikuyu White-eye"},
+            {ja: "キイロメジロ", en: "Northern Yellow White-eye"},
+            {ja: "チャイロムジチメドリ", en: "Brown Illadopsis"},
+            {ja: "ミヤマムジチメドリ", en: "Mountain Illadopsis"},
+            {ja: "ウロコムジチメドリ", en: "Scaly-breasted Illadopsis"},
+            {ja: "シャープヤブチメドリ", en: "Black-lored Babbler"},
+            {ja: "アカハシウシツツキ", en: "Red-billed Oxpecker"},
+            {ja: "キバシウシツツキ", en: "Yellow-billed Oxpecker"},
+            {ja: "アオテリムク", en: "Stuhlmann's Starling"},
+            {ja: "コオナガテリムク", en: "Rüppell's Starling"},
+            {ja: "ツキノワテリムク", en: "Superb Starling"},
+            {ja: "セイキムクドリ", en: "Greater Blue-eared Starling"},
+            {ja: "オジロアリクイツグミ", en: "White-tailed Ant-Thrush"},
+            {ja: "ワキアカオリーブツグミ", en: "Abyssinian Thrush"},
+            {ja: "アフリカツグミ", en: "African Thrush"},
+            {ja: "アフリカコサメビタキ", en: "African Dusky Flycatcher"},
+            {ja: "ムナフヒタキ", en: "Spotted Flycatcher"},
+            {ja: "コンゴサメビタキ", en: "Chapin's Flycatcher"},
+            {ja: "ウスハイイロヒタキ", en: "Ashy Flycatcher"},
+            {ja: "クロヒタキ", en: "Northern Black-Flycatcher"},
+            {ja: "メジロハイビタキ", en: "White-eyed Slaty-Flycatcher"},
+            {ja: "ツグミヒタキ", en: "Cape Robin-Chat"},
+            {ja: "ルリカタツグミヒタキ", en: "Blue-shouldered Robin-Chat"},
+            {ja: "オグロツグミヒタキ", en: "Rüppell's Robin-Chat"},
+            {ja: "マミジロツグミヒタキ", en: "White-browed Robin-Chat"},
+            {ja: "シロズキンツグミヒタキ", en: "Snowy-crowned Robin-Chat"},
+            {ja: "マミジロムジヒタキ", en: "Brown-chested Alethe"},
+            {ja: "コシアカヒメコマドリ", en: "Equatorial Akalat"},
+            {ja: "マミジロノビタキ", en: "Whinchat"},
+            {ja: "ニシノビタキ", en: "African Stonechat"},
+            {ja: "アリヒタキ", en: "Northern Anteater-Chat"},
+            {ja: "キバラコバシタイヨウチョウ", en: "Collared Sunbird"},
+            {ja: "アオガシラタイヨウチョウ", en: "Green-headed Sunbird"},
+            {ja: "オリーブタイヨウチョウ", en: "Olive Sunbird"},
+            {ja: "アオノドタイヨウチョウ", en: "Green-throated Sunbird"},
+            {ja: "ヒムネタイヨウチョウ", en: "Scarlet-chested Sunbird"},
+            {ja: "ブロンズオナガタイヨウチョウ", en: "Bronze Sunbird"},
+            {ja: "ミドリオナガタイヨウチョウ", en: "Malachite Sunbird"},
+            {ja: "キンバネオナガタイヨウチョウ", en: "Golden-winged Sunbird"},
+            {ja: "キタゴシキタイヨウチョウ", en: "Northern Double-collared Sunbird"},
+            {ja: "ゴシキタイヨウチョウ", en: "Eastern Double-collared Sunbird"},
+            {ja: "カワリタイヨウチョウ", en: "Variable Sunbird"},
+            {ja: "アカエリモリハタオリ", en: "Red-headed Malimbe"},
+            {ja: "アカガシラモリハタオリ", en: "Red-headed Weaver"},
+            {ja: "ミミグロハタオリ", en: "Baglafecht Weaver"},
+            {ja: "ノドグロハタオリ", en: "Black-necked Weaver"},
+            {ja: "メグロハタオリ", en: "Spectacled Weaver"},
+            {ja: "クロハラハタオリ", en: "Black-billed Weaver"},
+            {ja: "チャボウシハタオリ", en: "Brown-capped Weaver"},
+            {ja: "クロハタオリ", en: "Vieillot's Black Weaver"},
+            {ja: "カオグロウロコハタオリ", en: "Speke's Weaver"},
+            {ja: "ニショクハタオリ", en: "Dark-backed Weaver"},
+            {ja: "コクホウジャク", en: "Long-tailed Widowbird"},
+            {ja: "オドリホウオウ", en: "Jackson's Widowbird"},
+            {ja: "ハゴロモシチホウ", en: "Bronze Mannikin"},
+            {ja: "シロハラクロキンバラ", en: "White-breasted Nigrita"},
+            {ja: "シロボウシクロキンバラ", en: "Gray-headed Nigrita"},
+            {ja: "オナガカエデチョウ", en: "Common Waxbill"},
+            {ja: "ムラサキトキワスズメ", en: "Purple Grenadier"},
+            {ja: "セイキチョウ", en: "Red-cheeked Cordonbleu"},
+            {ja: "ズアカアオハシキンパラ", en: "Red-headed Bluebill"},
+            {ja: "イエスズメ", en: "House Sparrow"},
+            {ja: "ケニアアカスズメ", en: "Kenya Rufous Sparrow"},
+            {ja: "ハイガシラスズメ", en: "Northern Gray-headed Sparrow"},
+            {ja: "ニシツメナガセキレイ", en: "Western Yellow Wagtail"},
+            {ja: "ハジロハクセキレイ", en: "African Pied Wagtail"},
+            {ja: "アフリカマミジロタヒバリ", en: "African Pipit"},
+            {ja: "ヒバリツメナガタヒバリ", en: "Sharpe's Longclaw"},
+            {ja: "キムネツメナガタヒバリ", en: "Yellow-throated Longclaw"},
+            {ja: "ムナフヒワ", en: "African Citril"},
+            {ja: "オオカナリア", en: "Brimstone Canary"},
+            {ja: "タテフカナリア", en: "Streaky Seedeater"},
+            {ja: "キクイタダキカナリア", en: "Yellow-crowned Canary"}
+        ];
+
+        let currentIndex = 0;
+        let isAutoPlaying = false;
+        let autoTimer = null;
+
+        const englishText = document.getElementById('englishText');
+        const japaneseText = document.getElementById('japaneseText');
+        const japaneseSection = document.getElementById('japaneseSection');
+        const cardCounter = document.getElementById('cardCounter');
+        const statusBadge = document.getElementById('statusBadge');
+        const countdownText = document.getElementById('countdownText');
+        const startAutoBtn = document.getElementById('startAutoBtn');
+        const startBtnText = document.getElementById('startBtnText');
+        const startIcon = document.getElementById('startIcon');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+        const playEnBtn = document.getElementById('playEnBtn');
+        const playJaBtn = document.getElementById('playJaBtn');
+        const cardContainer = document.getElementById('cardContainer');
+        const intervalSelect = document.getElementById('intervalSelect');
+        const rateSelect = document.getElementById('rateSelect');
+        const birdTableBody = document.getElementById('birdTableBody');
+        const searchInput = document.getElementById('searchInput');
+
+        function speak(text, lang) {
+            if (!('speechSynthesis' in window)) return;
+            window.speechSynthesis.cancel();
+            const u = new SpeechSynthesisUtterance(text);
+            u.lang = lang;
+            u.rate = parseFloat(rateSelect.value);
+            window.speechSynthesis.speak(u);
+        }
+
+        function updateCard() {
+            const current = checklistData[currentIndex];
+            englishText.textContent = current.en;
+            japaneseText.textContent = current.ja || "(和名なし)";
+            cardCounter.textContent = `${currentIndex + 1} / ${checklistData.length}`;
+
+            japaneseSection.classList.add('opacity-30');
+            japaneseText.style.filter = "blur(4px)";
+            renderTable();
+        }
+
+        function revealJapanese() {
+            japaneseSection.classList.remove('opacity-30');
+            japaneseText.style.filter = "none";
+        }
+
+        function stopAutoPlay() {
+            isAutoPlaying = false;
+            clearTimeout(autoTimer);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            statusBadge.textContent = "停止中";
+            statusBadge.className = "bg-slate-100 text-slate-600 px-2 py-1 rounded font-medium";
+            countdownText.textContent = "";
+            startBtnText.textContent = "自動再生 開始";
+            startIcon.className = "fa-solid fa-play";
+            startAutoBtn.className = "bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 text-lg";
+        }
+
+        function processAutoStep() {
+            if (!isAutoPlaying) return;
+
+            const current = checklistData[currentIndex];
+            updateCard();
+
+            // 1. 英名を喋る
+            statusBadge.textContent = "英名読み上げ中";
+            statusBadge.className = "bg-emerald-100 text-emerald-800 px-2 py-1 rounded font-medium";
+            speak(current.en, 'en-US');
+
+            const waitSeconds = parseInt(intervalSelect.value, 10);
+            let remain = waitSeconds;
+            countdownText.textContent = `和名表示まで: ${remain} 秒`;
+
+            const cdInterval = setInterval(() => {
+                if (!isAutoPlaying) {
+                    clearInterval(cdInterval);
+                    return;
+                }
+                remain--;
+                if (remain > 0) {
+                    countdownText.textContent = `和名表示まで: ${remain} 秒`;
+                } else {
+                    clearInterval(cdInterval);
+                    countdownText.textContent = "";
+
+                    // 2. 和名を表示して喋る
+                    revealJapanese();
+                    statusBadge.textContent = "和名読み上げ中";
+                    statusBadge.className = "bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium";
+                    if (current.ja) {
+                        speak(current.ja, 'ja-JP');
+                    }
+
+                    // 3. 次の鳥へ進む (2.5秒後)
+                    autoTimer = setTimeout(() => {
+                        if (!isAutoPlaying) return;
+                        currentIndex = (currentIndex + 1) % checklistData.length;
+                        processAutoStep();
+                    }, 2500);
+                }
+            }, 1000);
+        }
+
+        startAutoBtn.addEventListener('click', () => {
+            if (isAutoPlaying) {
+                stopAutoPlay();
+            } else {
+                isAutoPlaying = true;
+                startBtnText.textContent = "停止";
+                startIcon.className = "fa-solid fa-square";
+                startAutoBtn.className = "bg-rose-600 hover:bg-rose-700 text-white font-bold px-8 py-3 rounded-xl shadow-md transition-all flex items-center gap-2 text-lg";
+                processAutoStep();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            stopAutoPlay();
+            currentIndex = (currentIndex - 1 + checklistData.length) % checklistData.length;
+            updateCard();
+        });
+
+        nextBtn.addEventListener('click', () => {
+            stopAutoPlay();
+            currentIndex = (currentIndex + 1) % checklistData.length;
+            updateCard();
+        });
+
+        shuffleBtn.addEventListener('click', () => {
+            stopAutoPlay();
+            for (let i = checklistData.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [checklistData[i], checklistData[j]] = [checklistData[j], checklistData[i]];
+            }
+            currentIndex = 0;
+            updateCard();
+        });
+
+        playEnBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            speak(checklistData[currentIndex].en, 'en-US');
+        });
+
+        playJaBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            revealJapanese();
+            if (checklistData[currentIndex].ja) {
+                speak(checklistData[currentIndex].ja, 'ja-JP');
+            }
+        });
+
+        cardContainer.addEventListener('click', () => {
+            revealJapanese();
+        });
+
+        function renderTable() {
+            const query = searchInput.value.toLowerCase().trim();
+            birdTableBody.innerHTML = '';
+
+            checklistData.forEach((bird, idx) => {
+                if (query && !bird.ja.toLowerCase().includes(query) && !bird.en.toLowerCase().includes(query)) {
+                    return;
+                }
+                const tr = document.createElement('tr');
+                tr.className = idx === currentIndex ? "bg-emerald-50 border-l-4 border-emerald-500 font-semibold" : "hover:bg-slate-50";
+                tr.innerHTML = `
+                    <td class="p-2.5 text-center text-xs text-slate-400">${idx + 1}</td>
+                    <td class="p-2.5 text-slate-800">${bird.en}</td>
+                    <td class="p-2.5 text-slate-700">${bird.ja || "(なし)"}</td>
+                    <td class="p-2.5 text-center">
+                        <button onclick="playSpecific(${idx})" class="text-emerald-600 hover:text-emerald-800 p-1">
+                            <i class="fa-solid fa-volume-low"></i>
+                        </button>
+                    </td>
+                `;
+                birdTableBody.appendChild(tr);
+            });
+        }
+
+        window.playSpecific = function(idx) {
+            stopAutoPlay();
+            currentIndex = idx;
+            updateCard();
+            revealJapanese();
+            speak(checklistData[idx].en, 'en-US');
+            setTimeout(() => {
+                if (checklistData[idx].ja) {
+                    speak(checklistData[idx].ja, 'ja-JP');
+                }
+            }, 1500);
+        };
+
+        searchInput.addEventListener('input', renderTable);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            updateCard();
+        });
+    </script>
+</body>
+</html>
